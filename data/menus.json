@@ -1,0 +1,32 @@
+{
+  "menus":[
+	{
+		"name": "Main",
+		"background": "#000000",
+		
+		"items":[
+			{
+				"type": "text",
+				"text": "Anim Test",
+				"x": "centre",
+				"y": 100,
+				"link": "animTest"
+			},
+			{
+				"type": "text",
+				"text": "Map Test",
+				"x": "centre",
+				"y": 200,
+				"link": "mapTest"
+			},
+			{
+				"type": "text",
+				"text": "Isometric Test",
+				"x": "centre",
+				"y": 300,
+				"link": "isoTest"
+			}
+		]
+	}
+	]
+}
