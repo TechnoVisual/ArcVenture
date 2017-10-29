@@ -1,0 +1,7 @@
+2017-10-29 21:00:15: -- Analysis Started by On File Change Incremental
+2017-10-29 21:00:16: Changes: 1, Conflicts: 0, CopyTime: 0, FixState: 0, Errors: 0, All: 109
+2017-10-29 21:00:16: Left to Right: Copy File: 1 
+2017-10-29 21:00:16: == Sync Started by On File Change Incremental
+2017-10-29 21:00:19: Copy Over 'C:/Projects/ArcVenture/dev/js/avengine.js' -> 'ftp://ftp.my3d.co.uk/technovisualeducation.co.uk/dev/ArcVenture/dev/js/avengine.js'
+2017-10-29 21:00:20: == Sync Complete. Time: 00:00:04, Speed: 2.54 KB/s, OK: 1, Errors: 0
+2017-10-29 21:00:20: 

@@ -13,6 +13,10 @@ var AVExit=false;
 var AVClickEvent = null;
 var AVCurrentMenu = null;
 var AVMenuText = "24px Arial";
+var AVCurrentMapX = 5;
+var AVCurrentMapY = 5;
+var AVCurrentMap = null;
+var AVCurrentMapView = 0;
 // 
 
 function AVLog(msg){
@@ -136,6 +140,7 @@ function isoTest(){
 }
 
 function mapMaker(){
+	drawMapMakerUi();
 	AVLoop = setInterval(mapMakerLoop,100);
 }
 
@@ -157,13 +162,37 @@ function isoLoop(){
 	}
 }
 
+//// Map Functions
+//---------------------
+
 function mapMakerLoop(){
 	var ctx = AVCanvasContext;
+	var scale = 0.5;
 	clearScreen("#000000");
 	ctx.font = AVMenuText;
 	drawCentreText("ArcVenture Map Maker",40);
+	if(AVCurrentMapView == 0){
+		drawOverheadMap(0,50,AVCurrentMapX,AVCurrentMapY,scale);
+	}else{
+		drawIsoMap(320,50,AVCurrentMapX,AVCurrentMapY,scale);
+	}
+}
+
+function drawMapMakerUi(){
+	tools = "<input id='overheadMap' type='button' value='Overhead View'><input id='isoMap' type='button' value='Isometric View'><br>";
+	tools += "Map Width: <input id='mapWidth' type='text' size=5><input id='updateWidth' type='button' value='Update'> Map Height: <input id='mapHeight' type='text' size=5><input id='updateHeight' type='button' value='Update'>";
+	$("#toolboxcontainer").html(tools); 
+}
+
+function drawOverheadMap(sx,sy,mx,my,sc){
+	var ctx = AVCanvasContext;
 	
 }
+
+function drawIsoMap(sx,sy,mx,my,sc){
+	var ctx = AVCanvasContext;
+}
+
 
 function drawMenu(thisMenu){
 	AVLog("drawMenu: Menu Name:"+thisMenu["name"]);
