@@ -107,7 +107,6 @@ function AVSetImageLoaded(src){
 function AVSetMenu(mName){
 	AVLog("AVSetMenu: "+mName);
 	AVCurrentMenu = findMenu(mName);
-	
 	drawMenu(AVCurrentMenu);
 	AVLoop = setInterval(checkMenu,200);
 }
@@ -133,9 +132,11 @@ function checkMenu(){
 }
 
 function isoTest(){
-	
-	
 	AVLoop = setInterval(isoLoop,100);
+}
+
+function mapMaker(){
+	AVLoop = setInterval(mapMakerLoop,100);
 }
 
 function isoLoop(){
@@ -154,6 +155,14 @@ function isoLoop(){
 			}
 		}
 	}
+}
+
+function mapMakerLoop(){
+	var ctx = AVCanvasContext;
+	clearScreen("#000000");
+	ctx.font = AVMenuText;
+	drawCentreText("ArcVenture Map Maker",40);
+	
 }
 
 function drawMenu(thisMenu){
@@ -180,6 +189,7 @@ function setMenuButtonBox(m,x,y,w,h){
 	m["bw"] = w;
 	m["bh"] = h;
 }
+
 function findMap(mName){
 	for(var m in AVMapData["isomaps"]){
 		if(AVMapData["isomaps"][m]["name"] == mName){
@@ -249,6 +259,16 @@ function drawButton(text,x,y){
 	ctx.fillText(text,x-halfWidth+10,y+25);
 	ctx.fillStyle = "#ffffff";
 	ctx.fillText(text,x-halfWidth+9,y+24);
+}
+
+function drawCentreText(text,y){
+	var ctx = AVCanvasContext;
+	textWidth = ctx.measureText(text).width;
+	halfWidth = (textWidth/2);
+	ctx.fillStyle = "#000000";
+	ctx.fillText(text,320-halfWidth+1,y+1);
+	ctx.fillStyle = "#ffffff";
+	ctx.fillText(text,320-halfWidth,y);
 }
 
 function AVCanvasClick(event){

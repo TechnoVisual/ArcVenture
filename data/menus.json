@@ -9,22 +9,29 @@
 				"type": "text",
 				"text": "Anim Test",
 				"x": "centre",
-				"y": 100,
+				"y": 70,
 				"link": "animTest"
 			},
 			{
 				"type": "text",
 				"text": "Map Test",
 				"x": "centre",
-				"y": 200,
+				"y": 170,
 				"link": "mapTest"
 			},
 			{
 				"type": "text",
 				"text": "Isometric Test",
 				"x": "centre",
-				"y": 300,
+				"y": 270,
 				"link": "isoTest"
+			},
+			{
+				"type": "text",
+				"text": "Map Maker",
+				"x": "centre",
+				"y": 370,
+				"link": "mapMaker"
 			}
 		]
 	}
