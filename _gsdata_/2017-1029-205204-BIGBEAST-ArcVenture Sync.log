@@ -1,8 +1,0 @@
-2017-10-29 20:52:05: Waiting for 8 sec on verb CWD /technovisualeducation.co.uk/dev/ArcVenture/dev: FTP Server Says: No transfer timeout (900 seconds): closing control connection
-2017-10-29 20:52:07: -- Analysis Started by On File Change Incremental
-2017-10-29 20:52:08: Changes: 1, Conflicts: 0, CopyTime: 0, FixState: 0, Errors: 0, All: 109
-2017-10-29 20:52:08: Left to Right: Copy File: 1 
-2017-10-29 20:52:08: == Sync Started by On File Change Incremental
-2017-10-29 20:52:11: Copy Over 'C:/Projects/ArcVenture/dev/js/avengine.js' -> 'ftp://ftp.my3d.co.uk/technovisualeducation.co.uk/dev/ArcVenture/dev/js/avengine.js'
-2017-10-29 20:52:12: == Sync Complete. Time: 00:00:04, Speed: 2.46 KB/s, OK: 1, Errors: 0
-2017-10-29 20:52:12: 

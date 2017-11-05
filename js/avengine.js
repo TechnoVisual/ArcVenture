@@ -3,6 +3,8 @@
 //
 
 // Global Variables
+var AVWidth = 800;
+var AVHeight = 600;
 var AVCanvas, AVCanvasContext;
 var AVImageData =[];
 var AVMenuData = null;
@@ -17,12 +19,46 @@ var AVCurrentMapX = 5;
 var AVCurrentMapY = 5;
 var AVCurrentMap = null;
 var AVCurrentMapView = 0;
+var AVlastLoop = new Date;
 // 
+
+// --------------------------------------
+// Utility Functions
+// --------------------------------------
 
 function AVLog(msg){
 	console.log(msg);
 }
+
+function loadJSON(path, callback) {   
+    var xobj = new XMLHttpRequest();
+        xobj.overrideMimeType("application/json");
+		xobj.open('GET', path, true); // Replace 'my_data' with the path to your file
+		xobj.onreadystatechange = function () {
+          if (xobj.readyState == 4 && xobj.status == "200") {
+            // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
+            callback(xobj.responseText);
+          }
+    };
+    xobj.send(null);  
+ }
  
+ function clearScreen(col){
+	AVCanvasContext.fillStyle = col;
+	AVCanvasContext.fillRect(0, 0, AVCanvas.width, AVCanvas.height); 
+ }
+ 
+ function AVCanvasClick(event){
+	cLeft = AVCanvas.offsetLeft,
+    cTop = AVCanvas.offsetTop,
+	AVLog("Canvas clicked: x:"+(event.pageX - cLeft)+" y:"+(event.pageY - cTop));
+	AVClickEvent = {x:(event.pageX - cLeft), y:(event.pageY - cTop)};
+}
+
+// ----------------------------------------
+// Setup Functions
+// ----------------------------------------
+
 function AVInit(){
 	// Initialise the game
 	AVLog("Initialising AVEngine.");
@@ -38,8 +74,8 @@ function AVMainLoop(){
 		AVLog("AVMainLoop: Stage:"+AVStage);
 		switch(AVStage){
 			case "logo" : 
-				drawLogo();
-				AVLoop = setInterval(checkContinue,200);
+				cw = drawLogo();
+				AVLoop = setInterval(checkContinue,200,cw);
 				break;
 			case "main menu":
 				AVSetMenu("Main");
@@ -108,6 +144,29 @@ function AVSetImageLoaded(src){
 	}
 }
 
+function drawLogo(){
+	// Draw Elements to the screen
+	clearScreen();
+	AVCanvasContext.drawImage(AVImageData['logo'].image, (AVWidth/2)-229, (AVHeight/2)-180);
+	cw = drawButton("Continue", AVWidth/2,(AVHeight/2)+200);
+	return cw;
+}
+
+function checkContinue(cw){
+	if(AVClickEvent != null){
+		if(AVClickEvent.x >(AVWidth/2)-(cw/2) && AVClickEvent.x < (AVWidth/2)+(cw/2) && AVClickEvent.y >(AVHeight/2)+200 && AVClickEvent.y < (AVHeight/2)+232){
+			AVStage="main menu";
+			AVClickEvent = null;
+			clearInterval(AVLoop);
+			AVMainLoop();
+		}
+	}
+}
+
+// -----------------------------------
+// Menu Functions 
+// -----------------------------------
+
 function AVSetMenu(mName){
 	AVLog("AVSetMenu: "+mName);
 	AVCurrentMenu = findMenu(mName);
@@ -135,65 +194,6 @@ function checkMenu(){
 	}
 }
 
-function isoTest(){
-	AVLoop = setInterval(isoLoop,100);
-}
-
-function mapMaker(){
-	drawMapMakerUi();
-	AVLoop = setInterval(mapMakerLoop,100);
-}
-
-function isoLoop(){
-	var ctx = AVCanvasContext;
-	clearScreen("#000000");
-	ctx.font = AVMenuText;
-	ctx.fillStyle = "#ffffff";
-	ctx.fillText("Isometric Test",240,40);
-	var x,y;
-	var md = findMap("map1");
-	var mdval = md["data"];
-	for(x=0;x<10;x++){
-		for(y=0;y<10;y++){
-			if(mdval[(x*10)+y] == 1){
-				ctx.drawImage(AVImageData['map1'].image, 288-(x*32)+(y*32), 80+(y*16)+(x*16));
-			}
-		}
-	}
-}
-
-//// Map Functions
-//---------------------
-
-function mapMakerLoop(){
-	var ctx = AVCanvasContext;
-	var scale = 0.5;
-	clearScreen("#000000");
-	ctx.font = AVMenuText;
-	drawCentreText("ArcVenture Map Maker",40);
-	if(AVCurrentMapView == 0){
-		drawOverheadMap(0,50,AVCurrentMapX,AVCurrentMapY,scale);
-	}else{
-		drawIsoMap(320,50,AVCurrentMapX,AVCurrentMapY,scale);
-	}
-}
-
-function drawMapMakerUi(){
-	tools = "<input id='overheadMap' type='button' value='Overhead View'><input id='isoMap' type='button' value='Isometric View'><br>";
-	tools += "Map Width: <input id='mapWidth' type='text' size=5><input id='updateWidth' type='button' value='Update'> Map Height: <input id='mapHeight' type='text' size=5><input id='updateHeight' type='button' value='Update'>";
-	$("#toolboxcontainer").html(tools); 
-}
-
-function drawOverheadMap(sx,sy,mx,my,sc){
-	var ctx = AVCanvasContext;
-	
-}
-
-function drawIsoMap(sx,sy,mx,my,sc){
-	var ctx = AVCanvasContext;
-}
-
-
 function drawMenu(thisMenu){
 	AVLog("drawMenu: Menu Name:"+thisMenu["name"]);
 	var ctx = AVCanvasContext;
@@ -201,7 +201,7 @@ function drawMenu(thisMenu){
 	for(var m in thisMenu["items"]){
 		mi = thisMenu["items"][m];
 		if(mi["x"] == "centre"){
-			x = 320;
+			x = AVWidth/2;
 		}else{
 			x = mi["x"];
 		}
@@ -219,14 +219,6 @@ function setMenuButtonBox(m,x,y,w,h){
 	m["bh"] = h;
 }
 
-function findMap(mName){
-	for(var m in AVMapData["isomaps"]){
-		if(AVMapData["isomaps"][m]["name"] == mName){
-			return AVMapData["isomaps"][m];
-		}
-	}
-}
-
 function findMenu(mName){
 	for(var m in AVMenuData["menus"]){
 		if(AVMenuData["menus"][m]["name"] == mName){
@@ -235,30 +227,60 @@ function findMenu(mName){
 	}
 }
 
-function loadJSON(path, callback) {   
-    var xobj = new XMLHttpRequest();
-        xobj.overrideMimeType("application/json");
-		xobj.open('GET', path, true); // Replace 'my_data' with the path to your file
-		xobj.onreadystatechange = function () {
-          if (xobj.readyState == 4 && xobj.status == "200") {
-            // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
-            callback(xobj.responseText);
-          }
-    };
-    xobj.send(null);  
- }
- 
- function clearScreen(col){
-	AVCanvasContext.fillStyle = col;
-	AVCanvasContext.fillRect(0, 0, AVCanvas.width, AVCanvas.height); 
- }
 
-function drawLogo(){
-	// Draw Elements to the screen
-	clearScreen();
-	AVCanvasContext.drawImage(AVImageData['logo'].image, 90, 30);
-	drawButton("Continue", 320,410);
+// --------------------------------------------
+// Map Drawing Functions
+// --------------------------------------------
+
+function isoTest(){
+	AVLoop = setInterval(isoLoop,40);
 }
+
+function isoLoop(){
+	var ctx = AVCanvasContext;
+	clearScreen("#000000");
+	ctx.font = AVMenuText;
+	ctx.fillStyle = "#ffffff";
+	ctx.fillText("Isometric Test",(AVWidth/2)-80,40);
+	var x,y;
+	var md = findMap("map1");
+	var mdval = md["data"];
+	var thisLoop = new Date;
+    var fps = 1000 / (thisLoop - AVlastLoop);
+    AVlastLoop = thisLoop;
+	for(x=0;x<10;x++){
+		for(y=0;y<10;y++){
+			if(mdval[(x*10)+y] == 1){
+				ctx.drawImage(AVImageData['map1'].image, (AVWidth/2)-32-(x*32)+(y*32), 80+(y*16)+(x*16));
+			}
+		}
+	}
+	drawFPS(parseInt(fps));
+}
+
+function drawFPS(fps){
+	var ctx = AVCanvasContext;
+	ctx.font = AVMenuText;
+	ctx.fillStyle = "#ffffff";
+	ctx.fillText("fps:"+fps,5,32);
+}
+
+function drawIsoMap(sx,sy,mx,my,sc){
+	var ctx = AVCanvasContext;
+}
+
+
+function findMap(mName){
+	for(var m in AVMapData["isomaps"]){
+		if(AVMapData["isomaps"][m]["name"] == mName){
+			return AVMapData["isomaps"][m];
+		}
+	}
+}
+
+// ----------------------------------------
+// Buttons and Text Functions
+// ----------------------------------------
 
 function drawButtonBox(ctx,x,y,w,h){
 	ctx.strokeStyle = "#ffffff";
@@ -288,6 +310,7 @@ function drawButton(text,x,y){
 	ctx.fillText(text,x-halfWidth+10,y+25);
 	ctx.fillStyle = "#ffffff";
 	ctx.fillText(text,x-halfWidth+9,y+24);
+	return textWidth;
 }
 
 function drawCentreText(text,y){
@@ -295,31 +318,10 @@ function drawCentreText(text,y){
 	textWidth = ctx.measureText(text).width;
 	halfWidth = (textWidth/2);
 	ctx.fillStyle = "#000000";
-	ctx.fillText(text,320-halfWidth+1,y+1);
+	ctx.fillText(text,(AVWidth/2)-halfWidth+1,y+1);
 	ctx.fillStyle = "#ffffff";
-	ctx.fillText(text,320-halfWidth,y);
+	ctx.fillText(text,(AVWidth/2)-halfWidth,y);
 }
 
-function AVCanvasClick(event){
-	cLeft = AVCanvas.offsetLeft,
-    cTop = AVCanvas.offsetTop,
-	AVLog("Canvas clicked: x:"+(event.pageX - cLeft)+" y:"+(event.pageY - cTop));
-	AVClickEvent = {x:(event.pageX - cLeft), y:(event.pageY - cTop)};
-}
 
-function checkContinue(){
-	if(AVClickEvent != null){
-		if(AVClickEvent.x >250 && AVClickEvent.x < 376 && AVClickEvent.y >410 && AVClickEvent.y < 442){
-			AVStage="main menu";
-			AVClickEvent = null;
-			clearInterval(AVLoop);
-			AVMainLoop();
-		}
-	}
-}
-
-function AVMainMenu(){
-	clearScreen();
-	
-}
 
