@@ -6,7 +6,33 @@
     },
 	{
 	  "name": "map1",
-      "path":"images/maps/map1.png"
+      "path":"images/maps/map1.png",
+	  "width":32,
+	  "height":34
+    },
+	{
+	  "name": "map2",
+      "path":"images/maps/map2.png",
+	  "width":32,
+	  "height":64
+    },
+	{
+	  "name": "map3",
+      "path":"images/maps/map3.png",
+	  "width":32,
+	  "height":128
+    },
+	{
+	  "name": "mapmask",
+      "path":"images/maps/mapmask.png",
+	  "width":802,
+	  "height":530
+    },
+	{
+	  "name": "player1",
+      "path":"images/player/player1.png",
+	  "width":64,
+	  "height":128
     }
   ]
 }
