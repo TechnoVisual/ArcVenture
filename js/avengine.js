@@ -9,6 +9,7 @@ var AVCanvas, AVCanvasContext;
 var AVImageData =[];
 var AVMenuData = null;
 var AVMapData = null;
+var AVMapCol = null;
 var AVLoop;
 var AVStage="logo";
 var AVExit=false;
@@ -23,8 +24,8 @@ var AVCurrentDir = 0;
 var AVCurrentMap = null;
 var AVCurrentMapView = 0;
 var AVlastLoop = new Date;
-var AVPlayerX = 10;
-var AVPlayerY = 10;
+var AVPlayerX = 19;
+var AVPlayerY = 20;
 // 
 
 // --------------------------------------
@@ -81,20 +82,27 @@ document.onkeydown = function(e) {
             break;
     }
 	*/
-	switch (e.keyCode) {
-        case 37:
-            if(AVCurrentMapX > 0) AVCurrentDir = 1;
-            break;
-        case 38:
-            if(AVCurrentMapY > 0) AVCurrentDir = 2;
-            break;
-        case 39:
-            AVCurrentDir = 3;
-            break;
-        case 40:
-            AVCurrentDir = 4;
-            break;
-    }
+	if(AVStage == "Iso Loop"){
+		switch (e.keyCode) {
+			case 37:
+				if(AVCurrentMapX > 0 && AVcheckCollision(AVPlayerX-1,AVPlayerY)) AVCurrentDir = 1;
+				break;
+			case 38:
+				if(AVCurrentMapY > 0 && AVcheckCollision(AVPlayerX,AVPlayerY-1)) AVCurrentDir = 2;
+				break;
+			case 39:
+				if(AVcheckCollision(AVPlayerX+1,AVPlayerY)){
+					AVCurrentDir = 3;
+				}
+				break;
+			case 40:
+				if(AVcheckCollision(AVPlayerX,AVPlayerY+1)){
+					AVCurrentDir = 4;
+				}
+				break;
+		}
+		
+	}
 };
 
 // ----------------------------------------
@@ -109,6 +117,7 @@ function AVInit(){
 	AVloadImages("data/images_0.json");
 	AVloadMenus("data/menus.json");
 	AVloadMaps("data/testmap2.json");
+	AVloadMapCol("data/mapcol.json");
 	AVCanvas.addEventListener('click', AVCanvasClick, false);
 }
 
@@ -149,6 +158,10 @@ function AVloadMaps(path){
 	loadJSON(path, loadMapsCallback);
 }
 
+function AVloadMapCol(path){
+	loadJSON(path, loadMapColCallback);
+}
+
 function loadImagesCallback(response){
 	imgJson = JSON.parse(response);
 	imagelist = imgJson.images;
@@ -172,6 +185,10 @@ function loadImagesCallback(response){
 	AVLoop = setInterval(AVWaitForImages, 100);
 } 
 
+function loadMapColCallback(response){
+	AVMapCol = JSON.parse(response);
+}
+
 function loadMenusCallback(response){
 	AVMenuData = JSON.parse(response);
 }
@@ -191,14 +208,14 @@ function AVSetImageLoaded(src){
 function drawLogo(){
 	// Draw Elements to the screen
 	clearScreen();
-	AVCanvasContext.drawImage(AVImageData['logo'].image, (AVWidth/2)-229, (AVHeight/2)-180);
-	cw = drawButton("Continue", AVWidth/2,(AVHeight/2)+200);
+	AVCanvasContext.drawImage(AVImageData['logo'].image, 0, 0);
+	cw = drawButton("Continue", AVWidth/2,(AVHeight/2)+230);
 	return cw;
 }
 
 function checkContinue(cw){
 	if(AVClickEvent != null){
-		if(AVClickEvent.x >(AVWidth/2)-(cw/2) && AVClickEvent.x < (AVWidth/2)+(cw/2) && AVClickEvent.y >(AVHeight/2)+200 && AVClickEvent.y < (AVHeight/2)+232){
+		if(AVClickEvent.x >(AVWidth/2)-(cw/2) && AVClickEvent.x < (AVWidth/2)+(cw/2) && AVClickEvent.y >(AVHeight/2)+230 && AVClickEvent.y < (AVHeight/2)+262){
 			AVStage="main menu";
 			AVClickEvent = null;
 			clearInterval(AVLoop);
@@ -276,11 +293,24 @@ function findMenu(mName){
 // Map Drawing Functions
 // --------------------------------------------
 
+function AVcheckCollision(x,y){
+	if (x < 13 || y < 13) return false;
+	var md = AVMapData;
+	var mdval = md["layers"][0]["data"];
+	var mapW = parseInt(md["layers"][0]["width"]);
+	maptile = mdval[((y*mapW)+x)];
+	//console.log(maptile);
+	//console.log(AVMapCol["mapcol"][maptile]);
+	if(AVMapCol["mapcol"][maptile] == 1) return false;
+	return true;
+}
+
 function isoTest(){
 	AVLoop = setInterval(isoLoop,40);
 }
 
 function isoLoop(){
+	AVStage = "Iso Loop";
 	var ctx = AVCanvasContext;
 	//clearScreen("#000000");
 	var x,y;
@@ -292,16 +322,17 @@ function isoLoop(){
 	var thisLoop = new Date;
     var fps = 1000 / (thisLoop - AVlastLoop);
     AVlastLoop = thisLoop;
+	AVCurrentMapX = AVPlayerX - 13;
+	AVCurrentMapY = AVPlayerY - 13;
 	for(x=0;x<40;x++){
 		for(y=0;y<40;y++){
-			
 			mdpos = ((AVCurrentMapY*mapW)+AVCurrentMapX)+((y*mapW))+x;
 			if(mdval[mdpos] != 0){
 				h = AVImageData['map'+mdval[mdpos]].height;
 				sx = (AVWidth/2)-32-(y*32)+(x*32)-AVCurrentMapMX+(AVCurrentMapMY*2);
 				sy = -130+(x*16)+(y*16)-(AVCurrentMapMX/2)-AVCurrentMapMY -h;
 				//console.log(x+","+y);
-				if(sx>-64 && sx<AVWidth && (sy+h)>50 && (sy+h)<AVHeight-50){
+				if(sx>-64 && sx<AVWidth && (sy+h)>50 && (sy+h)<AVHeight-30){
 					ctx.drawImage(AVImageData['map'+mdval[mdpos]].image, sx, sy);
 				}
 				if(x == 13 && y == 13){
@@ -309,7 +340,6 @@ function isoLoop(){
 					ctx.drawImage(AVImageData['player1'].image, sx, sy);
 				}
 			}
-			
 		}
 	}
 	ctx.drawImage(AVImageData['mapmask'].image,0, 0);
@@ -322,7 +352,7 @@ function isoLoop(){
 		case 1:
             AVCurrentMapMX -= 4;
 			if(AVCurrentMapMX == -32) {
-				AVCurrentMapX -=1;
+				AVPlayerX -=1;
 				AVCurrentMapMX = 0;
 				AVCurrentDir = 0;
 			}
@@ -330,7 +360,7 @@ function isoLoop(){
         case 2:
             AVCurrentMapMY -= 2;
 			if(AVCurrentMapMY == -16) {
-				AVCurrentMapY -=1;
+				AVPlayerY -=1;
 				AVCurrentMapMY = 0;
 				AVCurrentDir = 0;
 			}
@@ -338,7 +368,7 @@ function isoLoop(){
         case 3:
 			AVCurrentMapMX += 4;
 			if(AVCurrentMapMX == 32) {
-				AVCurrentMapX +=1;
+				AVPlayerX +=1;
 				AVCurrentMapMX = 0;
 				AVCurrentDir = 0;
 			}
@@ -346,7 +376,7 @@ function isoLoop(){
         case 4:
             AVCurrentMapMY += 2;
 			if(AVCurrentMapMY == 16) {
-				AVCurrentMapY +=1;
+				AVPlayerY +=1;
 				AVCurrentMapMY = 0;
 				AVCurrentDir = 0;
 			}
